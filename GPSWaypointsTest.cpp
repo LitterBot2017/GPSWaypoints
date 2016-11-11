@@ -22,7 +22,7 @@ int main() {
 	end.long_val=-79.942529238;
 	Waypoints test=Waypoints(start,end);
 	cout<<test.numOfPoints()<<endl;
-	for(int i=0;i<test.numOfPoints();i++)
+	for(int i=0;i<test.numOfPoints()-1;i++)
 	{
 		Waypoint getVal=test.getNextWaypoint();
 		cout<<std::fixed<<std::setprecision(12);

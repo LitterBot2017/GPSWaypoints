@@ -9,15 +9,11 @@
 #include "math.h"
 #include "tgmath.h"
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 Waypoints::Waypoints(Waypoint start, Waypoint end)
 {
-//	if(num_of_objects!=0)
-//	{
-//		return;
-//	}
-	//Waypoints::num_of_objects=1;
 	this->wayStart=start;
 	this->wayEnd=end;
 	generateWaypoints();
@@ -28,12 +24,8 @@ void Waypoints::generateWaypoints()
 	float totalXDist;
 	float totalYDist;
 	convertToMeter(wayStart,wayEnd,totalXDist, totalYDist);
-	cout<<totalXDist<<endl;
-	cout<<totalYDist<<endl;
 	int xGrid=fabs(floor(totalXDist/5));
 	int yGrid=fabs(floor(totalYDist/5));
-	cout<<"xGrid"<<xGrid<<endl;
-	cout<<"yGrid"<<yGrid<<endl;
 	this->uncoveredWaypoint [xGrid*yGrid];
 	//this->coveredWaypoint [xGrid*yGrid];
 	this->totalPoints=xGrid*yGrid;
@@ -44,34 +36,57 @@ void Waypoints::generateWaypoints()
 	cout<<"Onelatstep"<<oneLatStep<<endl;
 	cout<<"Onelongstep"<<oneLongStep<<endl;
 	Waypoint nextWay;
+	float lastY=wayStart.long_val;
+	bool addOrMinus=false;
 	for(int i=0;i<xGrid;i++)
 	{
 		float newXPoint=(i*oneLatStep)+wayStart.lat_val;
-		//cout<<"newXPoint"<<newXPoint<<endl;
+		if(addOrMinus==false)
+			addOrMinus=true;
+		else
+			addOrMinus=false;
+		float newYPoint;
 		for(int j=0;j<yGrid;j++)
 		{
-			float newYPoint=(j*oneLongStep)+wayStart.long_val;
-			//cout<<"newYPoint"<<newYPoint<<endl;
 
+			if(addOrMinus)
+				newYPoint=(j*oneLongStep)+lastY;
+			else
+				newYPoint=-(j*oneLongStep)+lastY;
 			nextWay.lat_val=newXPoint;
 			nextWay.long_val=newYPoint;
 			this->uncoveredWaypoint[(i*yGrid)+j]=nextWay;
-			//pushWaypoint(&this->uncoveredWaypoint[0],uncoveredPointer,nextWay);
-			this->uncoveredPointer+=1;
+
 		}
+
+		lastY=newYPoint;
 	}
+
 }
 
 int Waypoints::numOfPoints()
 {
+//	cout<<std::fixed<<std::setprecision(12);
+//	cout<<this->uncoveredWaypoint[5].lat_val;
+//	cout<<",";
+//	cout<<this->uncoveredWaypoint[5].long_val;
+//	cout<<endl;
 	return totalPoints;
 }
 
 Waypoint Waypoints::getNextWaypoint()
 {
-	Waypoint next=uncoveredWaypoint[uncoveredPointer-1];
-	this->uncoveredPointer-=1;
-	return next;
+
+	if(this->uncoveredPointer<numOfPoints())
+	{
+		Waypoint next=uncoveredWaypoint[this->uncoveredPointer];
+		this->uncoveredPointer+=1;
+		return next;
+	}
+	Waypoint error;
+	error.lat_val=-1;
+	error.long_val=-1;
+	return error;
 }
 
 void Waypoints::markWaypointDone(Waypoint done)
